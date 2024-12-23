@@ -286,35 +286,3 @@ function GetResultType(native, result) {
     }
     return type;
 }
-
-function DebugExecute(ws, action, name, args) {
-    let text = JSON.stringify({
-        action: action,
-        eid: uuidv4(),
-        data: {
-            name: name,
-            args: args
-        }
-    });
-    let encrypted = ZAES.encrypt(text);
-    ws.send(encrypted);
-}
-
-function DebugClient() {
-    // client debug
-    /* const client = new WebSocketClient(`ws://localhost:${Config.LISTEN_PORT}`);
-    client.on('open', function open() {
-        // DebugExecute(client, 'triggerClientEvent', 'chat:addMessage', [-1, { args: 'Hello, World!' }]);
-        DebugExecute(client, 'registerServerEvent', 'zerodream_chats:sendChat');
-    });
-
-    client.on('message', function incoming(data) {
-        let decrypted = ZAES.decrypt(data);
-        console.log('Client received: %s', decrypted);
-    }); */
-    var ZeroDream = exports.zerodream_core;
-    console.log(ZeroDream.getOwnedProperties());
-}
-
-// setTimeout(DebugClient, 1000);
-
