@@ -8,6 +8,7 @@ A WebSocket-based programming interface for FiveM.
 * Register commands
 * Execute code
 * Function callbacks
+* AES-256-CFB Encryption
 
 ## Installation
 1. Clone this repository into your server's resources directory.
