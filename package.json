@@ -1,4 +1,7 @@
 {
+  "name": "zerodream_nativeapi",
+  "version": "1.0.0",
+  "license": "MIT",
   "dependencies": {
     "crypto": "^1.0.1",
     "uuid": "^11.0.3",

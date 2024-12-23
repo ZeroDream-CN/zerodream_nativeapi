@@ -10,3 +10,7 @@ server_scripts {
     'zaes.js',
     'server.js',
 }
+
+dependencies {
+    'yarn',
+}

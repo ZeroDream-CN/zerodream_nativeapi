@@ -70,7 +70,7 @@ wss.on('connection', function connection(ws, request) {
                     case 'triggerClientEvent':
                         let clientEventName = json.data.name;
                         let clientEventArgs = json.data.args;
-                        if (clientEventName !== undefined && clientEventArgs !== undefined) {
+                        if (clientEventName !== undefined && clientEventArgs !== undefined && clientEventArgs.length > 0) {
                             emitNet(clientEventName, ...clientEventArgs);
                         }
                         response = JSON.stringify({
