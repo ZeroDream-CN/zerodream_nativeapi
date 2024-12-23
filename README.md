@@ -40,7 +40,8 @@ let aes  = new AES( 'aes-256-cfb', key, iv );
 let uuid = uuid();
 let jsonText = JSON.stringify({
     action: 'YOUR_ACTION',
-    data: 'YOUR_DATA'
+    data: 'YOUR_DATA',
+    eid: uuid
 });
 let encrypted = aes.encrypt( jsonText );
 wsc.send( encrypted );
