@@ -42,6 +42,7 @@ wss.on('connection', function connection(ws, request) {
                         if (name !== undefined && args !== undefined) {
                             let func = global[name];
                             if (func !== undefined) {
+                                args = ProcessVector3(args);
                                 result = func.apply(null, args);
                                 resultType = GetResultType(name, result);
                             }
@@ -59,6 +60,8 @@ wss.on('connection', function connection(ws, request) {
                         let eventName = json.data.name;
                         let eventArgs = json.data.args;
                         if (eventName !== undefined && eventArgs !== undefined) {
+                            eventArgs = ProcessArgs(ws, eventArgs);
+                            // eventArgs = ProcessVector3(eventArgs);
                             emit(eventName, ...eventArgs);
                         }
                         response = JSON.stringify({
@@ -71,6 +74,7 @@ wss.on('connection', function connection(ws, request) {
                         let clientEventName = json.data.name;
                         let clientEventArgs = json.data.args;
                         if (clientEventName !== undefined && clientEventArgs !== undefined && clientEventArgs.length > 0) {
+                            // clientEventArgs = ProcessVector3(clientEventArgs);
                             emitNet(clientEventName, ...clientEventArgs);
                         }
                         response = JSON.stringify({
@@ -93,7 +97,7 @@ wss.on('connection', function connection(ws, request) {
                                 });
                                 let encrypted = ZAES.encrypt(text);
                                 authMap.forEach(function(client) {
-                                    client.send(encrypted);
+                                    client.send('!' + encrypted + ';\n');
                                 });
                             });
                         }
@@ -108,7 +112,8 @@ wss.on('connection', function connection(ws, request) {
                         if (serverEvent !== undefined && !netEventMap.has(serverEvent)) {
                             netEventMap.set(serverEvent, true);
                             onNet(serverEvent, function(...args) {
-                                args.unshift(source);
+                                let _source = source;
+                                args.unshift(_source);
                                 let text = JSON.stringify({
                                     action: 'serverEvent',
                                     data: {
@@ -118,7 +123,7 @@ wss.on('connection', function connection(ws, request) {
                                 });
                                 let encrypted = ZAES.encrypt(text);
                                 authMap.forEach(function(client) {
-                                    client.send(encrypted);
+                                    client.send('!' + encrypted + ';\n');
                                 });
                             });
                         }
@@ -145,7 +150,7 @@ wss.on('connection', function connection(ws, request) {
                                 });
                                 let encrypted = ZAES.encrypt(text);
                                 authMap.forEach(function(client) {
-                                    client.send(encrypted);
+                                    client.send('!' + encrypted + ';\n');
                                 });
                             }, restricted);
                         }
@@ -188,6 +193,8 @@ wss.on('connection', function connection(ws, request) {
                         if (funcId !== undefined && funcArgs !== undefined) {
                             let func = funcMaps.get(funcId);
                             if (func !== undefined) {
+                                funcArgs = ProcessArgs(ws, funcArgs);
+                                // funcArgs = ProcessVector3(funcArgs);
                                 let result = func.ref.apply(null, funcArgs);
                                 let resultType = GetResultType(func.ref.name, result);
                                 response = JSON.stringify({
@@ -229,7 +236,7 @@ wss.on('connection', function connection(ws, request) {
             console.error(e);
         }
         let encrypted = ZAES.encrypt(response);
-        ws.send(encrypted);
+        ws.send('!' + encrypted + ';\n');
     });
 });
 
@@ -241,7 +248,7 @@ on('onResourceStop', function(resource) {
                 data: 'ok'
             });
             let encrypted = ZAES.encrypt(text);
-            client.send(encrypted);
+            client.send('!' + encrypted + ';\n');
         });
     }
 });
@@ -273,6 +280,42 @@ function ProcessObject(obj) {
         }
     }
     return obj;
+}
+
+function ProcessArgs(ws, args) {
+    for (let i = 0; i < args.length; i++) {
+        if (typeof args[i] === 'string' && args[i].startsWith('__FUNCTION__:')) {
+            let uuid = args[i].substring(13);
+            if (uuid !== undefined) {
+                args[i] = function(...args) {
+                    args = ProcessObject(args);
+                    console.log('Calling function: %s', uuid);
+                    let text = JSON.stringify({
+                        action: 'function',
+                        data: {
+                            id: uuid,
+                            args: args
+                        }
+                    });
+                    let encrypted = ZAES.encrypt(text);
+                    ws.send('!' + encrypted + ';\n');
+                }
+            }
+        }
+    }
+    return args;
+}
+
+function ProcessVector3(data) {
+    for (let key in data) {
+        if (typeof data[key] === 'string' && data[key].startsWith('__VECTOR3__:')) {
+            let parts = JSON.parse(data[key].substring(12));
+            data[key] = parts; // new Vector3(parseFloat(parts.x), parseFloat(parts.y), parseFloat(parts.z));
+        } else if (typeof data[key] === 'object' && data[key] !== null) {
+            ProcessVector3(data[key]);
+        }
+    }
+    return data;
 }
 
 function GetResultType(native, result) {
