@@ -30,7 +30,7 @@ ensure zerodream_nativeapi
 4. Restart your server.
 
 ## API usage
-Basic usage, not real code, you need to implement it yourself.
+Here is a basic usage of NativeAPI, it was not the real code, you can implement it yourself using any programming language you like.
 ```js
 let host = '127.0.0.1';
 let port = 38080;
@@ -49,7 +49,7 @@ wsc.send( encrypted );
 ```
 
 <details>
-  <summary>Server API</summary>
+  <summary>Server API List</summary>
 
 ### Auth
 Authenticate the client
@@ -106,6 +106,12 @@ Call a registered server side function with arguments
 | callFunction | (Map) { id: 'FunctionId', args: [ arg1, arg2, ... ] } |
 
 </details>
+
+## Languages SDK
+
+> Want to list your SDK here? [Open an issue](https://github.com/ZeroDream-CN/zerodream_nativeapi/issues)
+
+* PHP: [ZeroDream-CN/nativeapi-php](https://github.com/ZeroDream-CN/nativeapi-php)
 
 ## License
 This project is open-sourced under the MIT license.
